@@ -1,0 +1,17 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefination
+metadata:
+  name: flightticktes.flights.com
+spec:
+  scope: Namespaced
+  group: flights.com
+  names:
+    kind: FlightTicket
+    singular: flightticket
+    plural: flighttickets
+    shortnames:
+      - ft
+  versions:
+    - name: v1
+      served: true
+      storage: true

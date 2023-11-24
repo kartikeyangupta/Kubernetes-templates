@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  namespace: default
+  labels:
+    app: myapp
+  annotations:
+    build: 1.18
+spec:
+  serviceAccountName: dashboard-sa
+  automountServiceAccountToken: False
+  securityContext:
+    runAsUser: 1000
+  volumes:
+    - name: data-volume
+      awsElasticBlockStore:
+        volumeID: <volume-id>
+        fsType: ext4
+      hostPath:
+        path: /path
+        type: Directory
+     - name: mypd
+       persistentVolumeClaim:
+        claimName: myclaim
+  containers:
+    - name: nginx-container
+      image: nginx
+      command: ["sleep", "10"]
+      securityContext:
+        runAsUser: 1000
+        capabilities:
+          add: ["MAC_ADMIN"]
+      # args: ["10"]
+      env: #envFrom:
+      - name: APP_COLOR
+        # value: pink
+        valueFrom:
+            configMapRef:
+              name: app-config
+              key: APP_COLOR
+      envFrom:
+        - secretRef:
+            name: app-secret
+      volumes:
+      - name: app-secret-volume
+        secret:
+          secretName: app-secret
+      volumeMounts:
+        - mountPath: /logs
+          name: data-volume
+      readinessProbe:
+        httpGet:
+          path: /ready
+          port: 80
+        exec:
+          command:
+            - cat
+            - /app/ready
+        tcpSocket:
+          port: 80
+      livenessProbe:
+        httpGet:
+          path: /ready
+          port: 80
+        exec:
+          command:
+            - cat
+            - /app/ready
+        tcpSocket:
+          port: 80
+    tolerations:
+      - key: app
+        operator: "EQUAL"
+        value: blue
+        effect: noSchedule
+    affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: color
+                  operator: In
+                  value:
+                    - blue

@@ -1,0 +1,20 @@
+apiVersion: batch/v1beta
+kind: CrobJob
+metadata:
+  name: cron-job-1
+spec:
+  schedule: "*/1 * * * *" # every minute
+  jobTemplate:
+    spec:
+      completions: 3
+      parallelism: 3
+      template:
+        containers:
+          - name: math-add
+            image: ubuntu
+            command:
+              - expr
+              - '3'
+              - +
+              - '2'
+        restartPolicy: never

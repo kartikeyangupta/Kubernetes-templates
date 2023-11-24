@@ -1,0 +1,21 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration # | MutatingWebhookConfiguration
+metadata:
+  name: "pod-policy.example.com"
+webhooks:
+  - name: "pod-policy.example.com"
+    clientConfig:
+      # If the webhook server is hosted outside
+      url: "https://external-server.example.com/"
+      # if deployed in the cluster itself
+      service:
+        namespace: webhhook-namespace
+        name: webhook-service
+        path: "/mutate"
+      cabundle: <certificate-data>
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+        operations: ["CREATE"]
+        scope: "Namespaced"

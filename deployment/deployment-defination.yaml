@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  namespace: default
+  labels:
+    app: myapp
+    type: front-end
+spec:
+  statergy:
+  type: RollingUpdate | Recreate
+  rollingUpdate:
+    maxsurge: 25%
+  template:
+    metadata:
+      name: myapp-pod
+      labels:
+        app: myapp
+        type: front-end
+      spec:
+        volumes:
+          - name: mypd
+          persistentVolumeClaim:
+            claimName: myclaim
+        containers:
+          - name: nginx-container
+            image: nginx
+  replicas: 3
+  selector:
+    matchLabels:
+      type: front-end
